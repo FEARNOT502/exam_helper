@@ -18,7 +18,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import type { Question } from '../../types';
 import { Badge } from '../common/Badge';
-import { getLevelLabel, getLevelColor } from '../../utils/spaced-repetition';
+import { getLevelLabel } from '../../utils/spaced-repetition';
 import { renderPreview } from '../../utils/blank-parser';
 
 interface QuestionListProps {
@@ -42,63 +42,70 @@ function SortableItem({
     id: question.id,
   });
 
-  const style = {
+  const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: 12,
+    padding: '14px 14px 14px 10px',
+    background: 'var(--surface)',
+    border: '1px solid var(--line)',
+    borderRadius: 12,
   };
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="flex items-start gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700"
-    >
+    <div ref={setNodeRef} style={style}>
       <button
         {...attributes}
         {...listeners}
-        className="mt-1 text-gray-400 cursor-grab active:cursor-grabbing touch-none"
+        aria-label="드래그하여 순서 변경"
+        style={{
+          marginTop: 2,
+          color: 'var(--ink-4)',
+          cursor: 'grab',
+          touchAction: 'none',
+          background: 'none',
+          border: 'none',
+          padding: 4,
+          lineHeight: 1,
+        }}
       >
-        ⠿
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><circle cx="5" cy="4" r="1.1"/><circle cx="5" cy="8" r="1.1"/><circle cx="5" cy="12" r="1.1"/><circle cx="11" cy="4" r="1.1"/><circle cx="11" cy="8" r="1.1"/><circle cx="11" cy="12" r="1.1"/></svg>
       </button>
 
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1 flex-wrap">
-          <Badge
-            className={
-              question.type === 'blank'
-                ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'
-                : 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300'
-            }
-          >
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
+          <Badge className={question.type === 'blank' ? 'eh-chip-accent' : 'eh-chip-soft'}>
             {question.type === 'blank' ? '단답형' : '서술형'}
           </Badge>
-          <Badge className={getLevelColor(question.level)}>{getLevelLabel(question.level)}</Badge>
+          <Badge>{getLevelLabel(question.level)}</Badge>
           {question.tags.map((t) => (
-            <Badge key={t} className="bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-              {t}
-            </Badge>
+            <Badge key={t}>{t}</Badge>
           ))}
         </div>
-        <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
+        <p style={{ fontSize: 13.5, color: 'var(--ink-2)', margin: 0, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
           {question.type === 'blank' ? renderPreview(question.content) : question.content}
         </p>
       </div>
 
-      <div className="flex gap-1 shrink-0">
+      <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
         <button
           onClick={() => navigate(`/set/${setId}/edit/${question.id}`)}
-          className="p-1.5 text-gray-400 hover:text-blue-500 rounded transition-colors"
+          className="eh-icon-btn eh-icon-btn-sm"
+          aria-label="편집"
           title="편집"
         >
-          ✏️
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 2.5l2.5 2.5L5 13.5H2.5V11z"/></svg>
         </button>
         <button
           onClick={() => onDelete(question.id)}
-          className="p-1.5 text-gray-400 hover:text-red-500 rounded transition-colors"
+          className="eh-icon-btn eh-icon-btn-sm eh-icon-btn-danger"
+          aria-label="삭제"
           title="삭제"
         >
-          🗑️
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 4h10M6 4V2.5h4V4M4.5 4l.5 9.5h6L11.5 4"/></svg>
         </button>
       </div>
     </div>
@@ -123,7 +130,7 @@ export function QuestionList({ setId, questions, onReorder, onDelete }: Question
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={questions.map((q) => q.id)} strategy={verticalListSortingStrategy}>
-        <div className="space-y-2">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {questions.map((q) => (
             <SortableItem key={q.id} question={q} setId={setId} onDelete={onDelete} />
           ))}

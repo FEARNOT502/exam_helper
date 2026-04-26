@@ -8,6 +8,7 @@ interface BlankInputProps {
   submitted: boolean;
   correctAnswers: string[];
   onSubmit: () => void;
+  hintActive?: boolean;
 }
 
 export function BlankInput({
@@ -17,6 +18,7 @@ export function BlankInput({
   submitted,
   correctAnswers,
   onSubmit,
+  hintActive = false,
 }: BlankInputProps) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   let blankIndex = 0;
@@ -37,11 +39,29 @@ export function BlankInput({
   };
 
   return (
-    <p className="text-base text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    {hintActive && !submitted && (
+      <div style={{
+        display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center',
+        padding: '8px 12px',
+        background: 'var(--warn-soft)',
+        border: '1px solid var(--warn)',
+        borderRadius: 8,
+        animation: 'eh-fade-in .15s ease',
+      }}>
+        <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'oklch(45% 0.12 68)', fontWeight: 600, letterSpacing: '.04em', textTransform: 'uppercase' }}>힌트</span>
+        {correctAnswers.map((ans, i) => (
+          <span key={i} style={{
+            fontSize: 13, fontWeight: 600, color: 'oklch(45% 0.12 68)',
+            background: 'var(--warn)', opacity: .9,
+            padding: '2px 8px', borderRadius: 5,
+          }}>{ans}</span>
+        ))}
+      </div>
+    )}
+    <p style={{ fontSize: 15.5, lineHeight: 2, color: 'var(--ink-2)', whiteSpace: 'pre-wrap', margin: 0 }}>
       {parts.map((part, i) => {
-        if (part.type === 'text') {
-          return <span key={i}>{part.value}</span>;
-        }
+        if (part.type === 'text') return <span key={i}>{part.value}</span>;
         const bIdx = blankIndex++;
         const userVal = values[bIdx] ?? '';
         const correct = correctAnswers[bIdx];
@@ -50,8 +70,18 @@ export function BlankInput({
           userVal.replace(/\s/g, '').toLowerCase() === correct.replace(/\s/g, '').toLowerCase();
         const isWrong = submitted && !isCorrect;
 
+        let borderColor = 'var(--line-strong)';
+        let color = 'var(--ink)';
+        if (submitted && isCorrect) {
+          borderColor = 'var(--ok)';
+          color = 'var(--ok)';
+        } else if (isWrong) {
+          borderColor = 'var(--bad)';
+          color = 'var(--bad)';
+        }
+
         return (
-          <span key={i} className="inline-flex flex-col items-center mx-0.5">
+          <span key={i} style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', margin: '0 3px', verticalAlign: 'baseline' }}>
             <input
               ref={(el) => {
                 inputRefs.current[bIdx] = el;
@@ -65,19 +95,26 @@ export function BlankInput({
                 onChange(next);
               }}
               onKeyDown={(e) => handleKeyDown(e, bIdx)}
-              className={`
-                border-b-2 text-center outline-none bg-transparent text-base min-w-16 px-1
-                transition-colors
-                ${submitted
-                  ? isCorrect
-                    ? 'border-green-500 text-green-700 dark:text-green-400'
-                    : 'border-red-500 text-red-600 dark:text-red-400'
-                  : 'border-gray-400 dark:border-gray-500 focus:border-blue-500'}
-              `}
-              style={{ width: `${Math.max(4, correct.length) * 0.75 + 2}rem` }}
+              style={{
+                borderBottom: `1.5px solid ${borderColor}`,
+                textAlign: 'center',
+                outline: 'none',
+                background: 'transparent',
+                fontSize: 15,
+                minWidth: 64,
+                padding: '2px 6px',
+                color,
+                fontFamily: 'inherit',
+                border: 'none',
+                borderBottomWidth: 1.5,
+                borderBottomStyle: 'solid',
+                borderBottomColor: borderColor,
+                transition: 'border-color .15s',
+                width: `${Math.max(4, correct.length) * 0.75 + 2}rem`,
+              }}
             />
             {isWrong && (
-              <span className="text-xs text-green-700 dark:text-green-400 mt-0.5 font-medium">
+              <span style={{ fontSize: 11, color: 'var(--ok)', marginTop: 2, fontWeight: 500, fontFamily: 'var(--font-mono)' }}>
                 {correct}
               </span>
             )}
@@ -85,5 +122,6 @@ export function BlankInput({
         );
       })}
     </p>
+    </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import { useExamSets } from '../hooks/useExamSets';
+import { useExamSetsContext as useExamSets } from '../context/ExamSetsContext';
 import { useToast } from '../context/ToastContext';
 import { SetCard } from '../components/dashboard/SetCard';
 import { StatsOverview } from '../components/dashboard/StatsOverview';
@@ -33,10 +33,7 @@ export function Dashboard() {
 
   const handleCreate = () => {
     if (!newTitle.trim()) return;
-    const tags = newTags
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean);
+    const tags = newTags.split(',').map((t) => t.trim()).filter(Boolean);
     const created = addSet({ title: newTitle.trim(), subtitle: newSubtitle.trim() || undefined, tags });
     showToast('족보 세트가 만들어졌습니다.');
     setShowNewModal(false);
@@ -67,59 +64,92 @@ export function Dashboard() {
     }
   };
 
+  const totalSets = sets.length;
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
+    <div className="eh-shell">
+      <div style={{ maxWidth: 1080, margin: '0 auto', padding: '44px 28px 64px' }}>
+        {/* Header */}
+        <header style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 20, marginBottom: 32, flexWrap: 'wrap' }}>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">시험 족보 암기장</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">효과적인 반복 학습으로 완벽 암기</p>
+            <p className="eh-eyebrow" style={{ marginBottom: 10 }}>EXAM HELPER · v2</p>
+            <h1 style={{
+              fontSize: 34, fontWeight: 600, letterSpacing: '-.025em',
+              color: 'var(--ink)', margin: 0, lineHeight: 1.15,
+            }}>
+              족보
+            </h1>
+            <p className="eh-muted" style={{ fontSize: 14, marginTop: 8, maxWidth: 480, lineHeight: 1.55 }}>
+              시험 족보를 단답형·서술형 카드로 쪼개서 반복 학습합니다. 망각곡선 기반 복습으로 오래 기억하세요.
+            </p>
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-            >
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 10V2M5 5l3-3 3 3M3 10v3h10v-3"/></svg>
               가져오기
             </Button>
-            <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
-            <Button onClick={() => setShowNewModal(true)}>+ 새 족보</Button>
+            <input ref={fileInputRef} type="file" accept=".json" className="hidden" style={{ display: 'none' }} onChange={handleImport} />
+            <Button size="sm" onClick={() => setShowNewModal(true)}>
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><path d="M8 3v10M3 8h10"/></svg>
+              새 족보
+            </Button>
           </div>
-        </div>
+        </header>
 
-        {sets.length > 0 && (
-          <div className="mb-6">
+        {/* Stats */}
+        {totalSets > 0 && (
+          <div style={{ marginBottom: 24 }}>
             <StatsOverview sets={sets} />
           </div>
         )}
 
-        <div className="mb-5">
-          <input
-            type="search"
-            placeholder="족보 검색 (제목, 태그)"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+        {/* Section header */}
+        {totalSets > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, gap: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+              <h2 style={{ fontSize: 13, fontWeight: 600, letterSpacing: '-.005em', color: 'var(--ink)', margin: 0 }}>
+                나의 족보
+              </h2>
+              <span className="eh-mono eh-muted-2" style={{ fontSize: 12 }}>
+                {filtered.length}{search ? ` / ${totalSets}` : ''}
+              </span>
+            </div>
+            <div style={{ position: 'relative', width: 260, maxWidth: '50%' }}>
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"
+                style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-4)', pointerEvents: 'none' }}>
+                <circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L13 13" strokeLinecap="round"/>
+              </svg>
+              <input
+                type="search"
+                placeholder="제목, 태그 검색"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="eh-input"
+                style={{ paddingLeft: 32, height: 34, fontSize: 13 }}
+              />
+            </div>
+          </div>
+        )}
 
-        {sets.length === 0 ? (
+        {/* Content */}
+        {totalSets === 0 ? (
           <EmptyState
-            icon="📚"
-            title="족보가 없습니다"
-            description="새 족보를 만들거나 JSON 파일을 가져오세요."
+            title="아직 족보가 없습니다"
+            description="새 족보를 만들거나 JSON 파일을 가져와서 학습을 시작하세요."
             actionLabel="새 족보 만들기"
             onAction={() => setShowNewModal(true)}
           />
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon="🔍"
-            title="검색 결과가 없습니다"
+            title="검색 결과 없음"
             description={`"${search}"에 해당하는 족보를 찾을 수 없습니다.`}
           />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: 12,
+          }}>
             {filtered.map((set) => (
               <SetCard key={set.id} set={set} onDelete={handleDelete} />
             ))}
@@ -128,10 +158,10 @@ export function Dashboard() {
       </div>
 
       <Modal open={showNewModal} onClose={() => setShowNewModal(false)} title="새 족보 만들기">
-        <div className="space-y-4">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              제목 <span className="text-red-500">*</span>
+            <label className="eh-field-label">
+              제목 <span style={{ color: 'var(--bad)' }}>*</span>
             </label>
             <input
               autoFocus
@@ -140,40 +170,32 @@ export function Dashboard() {
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="eh-input"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              부제목
-            </label>
+            <label className="eh-field-label">부제목</label>
             <input
               type="text"
               placeholder="예: 2024-1학기 중간고사"
               value={newSubtitle}
               onChange={(e) => setNewSubtitle(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="eh-input"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              태그 (쉼표로 구분)
-            </label>
+            <label className="eh-field-label">태그 (쉼표로 구분)</label>
             <input
               type="text"
               placeholder="예: 3학년, 전공필수"
               value={newTags}
               onChange={(e) => setNewTags(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="eh-input"
             />
           </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <Button variant="secondary" onClick={() => setShowNewModal(false)}>
-              취소
-            </Button>
-            <Button onClick={handleCreate} disabled={!newTitle.trim()}>
-              만들기
-            </Button>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 4 }}>
+            <Button variant="secondary" onClick={() => setShowNewModal(false)}>취소</Button>
+            <Button onClick={handleCreate} disabled={!newTitle.trim()}>만들기</Button>
           </div>
         </div>
       </Modal>

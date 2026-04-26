@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useCallback } from 'react';
 
 export function useLocalStorage<T>(key: string, initialValue: T) {
   const [storedValue, setStoredValue] = useState<T>(() => {
@@ -10,21 +10,20 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     }
   });
 
-  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const setValue = useCallback(
+    (value: T | ((prev: T) => T)) => {
+      setStoredValue((prev) => {
+        const next = typeof value === 'function' ? (value as (prev: T) => T)(prev) : value;
+        try {
+          window.localStorage.setItem(key, JSON.stringify(next));
+        } catch {
+          // storage full or unavailable
+        }
+        return next;
+      });
+    },
+    [key]
+  );
 
-  useEffect(() => {
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    debounceTimer.current = setTimeout(() => {
-      try {
-        window.localStorage.setItem(key, JSON.stringify(storedValue));
-      } catch {
-        // storage full or unavailable
-      }
-    }, 300);
-    return () => {
-      if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    };
-  }, [key, storedValue]);
-
-  return [storedValue, setStoredValue] as const;
+  return [storedValue, setValue] as const;
 }

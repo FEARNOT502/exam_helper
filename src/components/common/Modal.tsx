@@ -22,17 +22,43 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/50"
+      className="fixed inset-0 z-40 flex items-center justify-center p-6"
       onClick={onClose}
+      style={{
+        background: 'oklch(15% 0.02 270 / .32)',
+        backdropFilter: 'blur(4px)',
+        animation: 'eh-fade-in .15s ease',
+      }}
     >
       <div
-        className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6"
+        className="w-full max-w-md"
+        style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--line)',
+          borderRadius: 24,
+          boxShadow: '0 30px 80px -20px oklch(0% 0 0 / .25)',
+          overflow: 'hidden',
+          animation: 'eh-modal-in .2s cubic-bezier(.2,.7,.3,1.1)',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {title && (
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{title}</h2>
+          <div style={{ padding: '22px 24px 4px' }}>
+            <div className="flex items-center justify-between">
+              <h2 style={{ fontSize: 17, fontWeight: 600, letterSpacing: '-.01em', margin: 0, color: 'var(--ink)' }}>
+                {title}
+              </h2>
+              <button
+                onClick={onClose}
+                className="eh-icon-btn eh-icon-btn-sm"
+                aria-label="닫기"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
         )}
-        {children}
+        <div style={{ padding: '18px 24px 24px' }}>{children}</div>
       </div>
     </div>
   );

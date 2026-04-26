@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useExamSets } from '../hooks/useExamSets';
+import { useExamSetsContext as useExamSets } from '../context/ExamSetsContext';
 import { useToast } from '../context/ToastContext';
 import { Button } from '../components/common/Button';
+import { Badge } from '../components/common/Badge';
 import { EmptyState } from '../components/common/EmptyState';
 import { Modal } from '../components/common/Modal';
 import { QuestionList } from '../components/editor/QuestionList';
 import { TagInput } from '../components/editor/TagInput';
 import { exportExamSet } from '../utils/export-import';
+import { isDueForReview } from '../utils/spaced-repetition';
 import type { StudyFilter } from '../types';
 
 export function SetDetail() {
@@ -29,9 +31,8 @@ export function SetDetail() {
 
   if (!set) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="eh-shell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <EmptyState
-          icon="❌"
           title="족보를 찾을 수 없습니다"
           actionLabel="홈으로"
           onAction={() => navigate('/')}
@@ -39,6 +40,12 @@ export function SetDetail() {
       </div>
     );
   }
+
+  const total = set.questions.length;
+  const memorized = set.questions.filter((q) => q.level === 3).length;
+  const unlearned = set.questions.filter((q) => q.level === 0).length;
+  const dueCount = set.questions.filter(isDueForReview).length;
+  const wrongCount = set.questions.filter((q) => q.history.some((h) => !h.correct)).length;
 
   const startEdit = () => {
     setTitleInput(set.title);
@@ -76,90 +83,132 @@ export function SetDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <button
-            onClick={() => navigate('/')}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
-          >
-            ←
-          </button>
-          <div className="flex-1 min-w-0">
+    <div className="eh-shell">
+      <div style={{ maxWidth: 880, margin: '0 auto', padding: '32px 28px 64px' }}>
+        {/* Back link */}
+        <button
+          onClick={() => navigate('/')}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            background: 'none', border: 'none', color: 'var(--ink-3)',
+            fontSize: 12.5, cursor: 'pointer', padding: 0, marginBottom: 20,
+            fontFamily: 'inherit',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink)')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--ink-3)')}
+        >
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M10 3L5 8l5 5"/></svg>
+          족보 목록
+        </button>
+
+        {/* Title header */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 20, marginBottom: 28, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 280 }}>
             {editingTitle ? (
-              <div className="space-y-2">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <input
                   autoFocus
                   type="text"
                   value={titleInput}
                   onChange={(e) => setTitleInput(e.target.value)}
-                  className="w-full px-3 py-2 text-xl font-bold rounded-lg border border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="eh-input"
+                  style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-.02em', height: 44 }}
                 />
                 <input
                   type="text"
                   placeholder="부제목 (선택)"
                   value={subtitleInput}
                   onChange={(e) => setSubtitleInput(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="eh-input"
                 />
                 <TagInput tags={tagsInput} onChange={setTagsInput} />
-                <div className="flex gap-2">
-                  <Button size="sm" onClick={saveEdit}>
-                    저장
-                  </Button>
-                  <Button size="sm" variant="secondary" onClick={() => setEditingTitle(false)}>
-                    취소
-                  </Button>
+                <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                  <Button size="sm" onClick={saveEdit}>저장</Button>
+                  <Button size="sm" variant="secondary" onClick={() => setEditingTitle(false)}>취소</Button>
                 </div>
               </div>
             ) : (
-              <div
-                className="cursor-pointer group"
-                onClick={startEdit}
-                title="클릭해서 편집"
-              >
-                <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+              <div onClick={startEdit} style={{ cursor: 'pointer' }} title="클릭해서 편집">
+                <p className="eh-eyebrow" style={{ marginBottom: 8 }}>SET</p>
+                <h1 style={{
+                  fontSize: 28, fontWeight: 600, letterSpacing: '-.025em',
+                  color: 'var(--ink)', margin: 0, lineHeight: 1.2,
+                }}>
                   {set.title}
                 </h1>
                 {set.subtitle && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{set.subtitle}</p>
+                  <p className="eh-muted" style={{ fontSize: 14, margin: 0, marginTop: 6 }}>
+                    {set.subtitle}
+                  </p>
+                )}
+                {set.tags.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 12 }}>
+                    {set.tags.map((t) => <Badge key={t}>{t}</Badge>)}
+                  </div>
                 )}
               </div>
             )}
           </div>
-          <div className="flex gap-2 shrink-0">
-            <Button variant="secondary" size="sm" onClick={() => setShowExportModal(true)}>
-              내보내기
-            </Button>
-            <Button size="sm" onClick={() => setShowStudyModal(true)} disabled={set.questions.length === 0}>
-              학습 시작
+          {!editingTitle && (
+            <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+              <Button variant="secondary" size="sm" onClick={() => setShowExportModal(true)}>
+                내보내기
+              </Button>
+              <Button variant="secondary" size="lg" onClick={() => navigate(`/set/${set.id}/practice`)} disabled={total === 0}>
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 2.5l2.5 2.5L5 13.5H2.5V11z"/></svg>
+                연습하기
+              </Button>
+              <Button size="lg" onClick={() => setShowStudyModal(true)} disabled={total === 0}>
+                학습 시작
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M4 3l8 5-8 5z"/></svg>
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Stats row */}
+        {total > 0 && (
+          <div
+            className="eh-card-flat"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              marginBottom: 24,
+            }}
+          >
+            <StatCell label="총 문제" value={total} />
+            <StatCell label="미학습" value={unlearned} tone={unlearned > 0 ? 'warn' : 'neutral'} divider />
+            <StatCell label="암기 완료" value={memorized} tone="ok" divider />
+            <StatCell label="오늘 복습" value={dueCount} tone={dueCount > 0 ? 'warn' : 'neutral'} divider />
+          </div>
+        )}
+
+        {/* Sub-actions */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+            <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)', margin: 0 }}>
+              문제 목록
+            </h2>
+            <span className="eh-mono eh-muted-2" style={{ fontSize: 12 }}>{total}</span>
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {wrongCount > 0 && (
+              <Button variant="ghost" size="sm" onClick={() => navigate(`/set/${set.id}/wrong`)}>
+                오답 노트 <span className="eh-mono eh-muted-2" style={{ fontSize: 11, marginLeft: 4 }}>{wrongCount}</span>
+              </Button>
+            )}
+            <Button variant="secondary" size="sm" onClick={() => navigate(`/set/${set.id}/add`)}>
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><path d="M8 3v10M3 8h10"/></svg>
+              문제 추가
             </Button>
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex gap-2 mb-6">
-          <Button variant="secondary" size="sm" onClick={() => navigate(`/set/${set.id}/add`)}>
-            + 문제 추가
-          </Button>
-          {set.questions.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(`/set/${set.id}/wrong`)}
-            >
-              오답 노트
-            </Button>
-          )}
-        </div>
-
         {/* Question List */}
-        {set.questions.length === 0 ? (
+        {total === 0 ? (
           <EmptyState
-            icon="📝"
             title="문제가 없습니다"
-            description="문제를 추가하여 학습을 시작하세요."
+            description="문제를 추가하여 학습을 시작하세요. 단답형·서술형 둘 다 가능합니다."
             actionLabel="문제 추가"
             onAction={() => navigate(`/set/${set.id}/add`)}
           />
@@ -175,51 +224,48 @@ export function SetDetail() {
 
       {/* Study Modal */}
       <Modal open={showStudyModal} onClose={() => setShowStudyModal(false)} title="학습 시작">
-        <div className="space-y-3">
-          {(
-            [
-              { value: 'all', label: '전체 문제', desc: `${set.questions.length}문제` },
-              {
-                value: 'unlearned',
-                label: '미학습 문제',
-                desc: `${set.questions.filter((q) => q.level === 0).length}문제`,
-              },
-              {
-                value: 'wrong',
-                label: '오답 문제',
-                desc: `${set.questions.filter((q) => q.history.some((h) => !h.correct)).length}문제`,
-              },
-              { value: 'shuffle', label: '전체 셔플', desc: `${set.questions.length}문제 (랜덤 순서)` },
-            ] as const
-          ).map((opt) => (
-            <label
-              key={opt.value}
-              className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                studyFilter === opt.value
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                  : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50'
-              }`}
-            >
-              <input
-                type="radio"
-                name="studyFilter"
-                value={opt.value}
-                checked={studyFilter === opt.value}
-                onChange={() => setStudyFilter(opt.value)}
-                className="accent-blue-600"
-              />
-              <div>
-                <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  {opt.label}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {([
+            { value: 'all', label: '전체 문제', desc: `${total}문제를 순서대로` },
+            { value: 'unlearned', label: '미학습 문제만', desc: `${unlearned}문제` },
+            { value: 'wrong', label: '오답 문제만', desc: `${wrongCount}문제` },
+            { value: 'shuffle', label: '전체 셔플', desc: `${total}문제, 랜덤 순서` },
+          ] as const).map((opt) => {
+            const active = studyFilter === opt.value;
+            return (
+              <label
+                key={opt.value}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 14,
+                  padding: '12px 14px',
+                  borderRadius: 12,
+                  border: `1px solid ${active ? 'var(--accent)' : 'var(--line)'}`,
+                  background: active ? 'var(--accent-soft)' : 'var(--surface)',
+                  cursor: 'pointer',
+                  transition: 'all .12s',
+                }}
+              >
+                <input
+                  type="radio"
+                  name="studyFilter"
+                  value={opt.value}
+                  checked={active}
+                  onChange={() => setStudyFilter(opt.value)}
+                  style={{ accentColor: 'var(--accent)' }}
+                />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13.5, fontWeight: 500, color: active ? 'var(--accent-ink)' : 'var(--ink)' }}>
+                    {opt.label}
+                  </div>
+                  <div style={{ fontSize: 12, color: active ? 'var(--accent-ink)' : 'var(--ink-3)', opacity: active ? .8 : 1, marginTop: 2, fontFamily: 'var(--font-mono)' }}>
+                    {opt.desc}
+                  </div>
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">{opt.desc}</div>
-              </div>
-            </label>
-          ))}
-          <div className="flex justify-end gap-2 pt-2">
-            <Button variant="secondary" onClick={() => setShowStudyModal(false)}>
-              취소
-            </Button>
+              </label>
+            );
+          })}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 8 }}>
+            <Button variant="secondary" onClick={() => setShowStudyModal(false)}>취소</Button>
             <Button onClick={handleStartStudy}>시작</Button>
           </div>
         </div>
@@ -227,31 +273,59 @@ export function SetDetail() {
 
       {/* Export Modal */}
       <Modal open={showExportModal} onClose={() => setShowExportModal(false)} title="내보내기">
-        <div className="space-y-4">
-          <label className="flex items-center gap-3 cursor-pointer">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', padding: 12, background: 'var(--surface-2)', borderRadius: 10 }}>
             <input
               type="checkbox"
               checked={includeHistory}
               onChange={(e) => setIncludeHistory(e.target.checked)}
-              className="accent-blue-600 w-4 h-4"
+              style={{ accentColor: 'var(--accent)', width: 16, height: 16 }}
             />
             <div>
-              <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+              <div style={{ fontSize: 13.5, fontWeight: 500, color: 'var(--ink)' }}>
                 학습 이력 포함
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
+              <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 2 }}>
                 암기 단계 및 풀이 기록을 함께 내보냅니다
               </div>
             </div>
           </label>
-          <div className="flex justify-end gap-2 pt-2">
-            <Button variant="secondary" onClick={() => setShowExportModal(false)}>
-              취소
-            </Button>
-            <Button onClick={handleExport}>다운로드</Button>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+            <Button variant="secondary" onClick={() => setShowExportModal(false)}>취소</Button>
+            <Button onClick={handleExport}>JSON 다운로드</Button>
           </div>
         </div>
       </Modal>
+    </div>
+  );
+}
+
+function StatCell({
+  label,
+  value,
+  tone = 'neutral',
+  divider = false,
+}: {
+  label: string;
+  value: number;
+  tone?: 'neutral' | 'ok' | 'warn';
+  divider?: boolean;
+}) {
+  const color = tone === 'ok' ? 'var(--ok)' : tone === 'warn' ? 'var(--warn)' : 'var(--ink)';
+  return (
+    <div style={{
+      padding: '18px 20px',
+      borderLeft: divider ? '1px solid var(--line)' : 'none',
+    }}>
+      <p className="eh-eyebrow" style={{ margin: 0, marginBottom: 10 }}>{label}</p>
+      <div style={{
+        fontSize: 26, fontWeight: 400, letterSpacing: '-.03em',
+        color, lineHeight: 1,
+        fontVariantNumeric: 'tabular-nums',
+        fontFamily: 'var(--font-mono)',
+      }}>
+        {value}
+      </div>
     </div>
   );
 }
