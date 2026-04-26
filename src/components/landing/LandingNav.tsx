@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { ThemeToggle } from '../common/ThemeToggle';
 
 export function LandingNav() {
   return (
@@ -10,11 +11,12 @@ export function LandingNav() {
         <div className="landing-nav-right">
           <a href="#features">기능</a>
           <a href="#how">사용법</a>
-          <Link to="/login" className="eh-btn eh-btn-secondary" style={{ height: 30, padding: '0 12px', fontSize: 12.5, borderRadius: 8 }}>
-            로그인
+          <ThemeToggle />
+          <Link to="/signup" className="eh-btn eh-btn-secondary" style={{ height: 30, padding: '0 12px', fontSize: 12.5, borderRadius: 8 }}>
+            회원가입
           </Link>
-          <Link to="/signup" className="eh-btn eh-btn-primary" style={{ height: 30, padding: '0 12px', fontSize: 12.5, borderRadius: 8 }}>
-            무료 시작
+          <Link to="/dashboard" className="eh-btn eh-btn-primary" style={{ height: 30, padding: '0 12px', fontSize: 12.5, borderRadius: 8 }}>
+            비로그인으로 시작
           </Link>
         </div>
       </div>

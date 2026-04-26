@@ -18,6 +18,9 @@ export function Hero() {
               <path d="M3 8h10M9 4l4 4-4 4"/>
             </svg>
           </Link>
+          <Link to="/dashboard" className="eh-btn eh-btn-secondary" style={{ height: 46, padding: '0 20px', fontSize: 14, borderRadius: 12 }}>
+            비로그인으로 시작
+          </Link>
         </div>
       </div>
       <DashboardPreview />
