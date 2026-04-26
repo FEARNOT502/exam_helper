@@ -6,7 +6,7 @@ export function LandingNav() {
     <nav className="landing-nav">
       <div className="landing-nav-inner">
         <div className="landing-logo">
-          <span className="mark">E</span> Exam Helper
+          <span className="mark">E</span> <span className="logo-text">Exam Helper</span>
         </div>
         <div className="landing-nav-right">
           <a href="#features">기능</a>

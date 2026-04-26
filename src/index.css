@@ -281,9 +281,9 @@
 
 /* App pages mobile overrides */
 @media (max-width: 600px) {
-  .eh-shell .topbar-inner { padding: 0 16px !important; gap: 12px !important; }
-  .eh-shell .topbar-nav { gap: 2px !important; }
-  .eh-shell .topbar-brand-text { display: none !important; }
+  .eh-shell .topbar-inner { padding: 0 16px !important; gap: 14px !important; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+  .eh-shell .topbar-inner::-webkit-scrollbar { display: none; }
+  .eh-shell .topbar-nav { gap: 6px !important; }
   
   .eh-shell .page-container { padding: 24px 16px 48px !important; }
   .eh-shell .eh-card { padding-left: 16px !important; padding-right: 16px !important; }

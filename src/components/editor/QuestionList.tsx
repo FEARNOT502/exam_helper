@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   DndContext,
@@ -41,6 +42,7 @@ function SortableItem({
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: question.id,
   });
+  const [showAnswer, setShowAnswer] = useState(false);
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -88,9 +90,25 @@ function SortableItem({
         <p style={{ fontSize: 13.5, color: 'var(--ink-2)', margin: 0, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
           {question.type === 'blank' ? renderPreview(question.content) : question.content}
         </p>
+        {showAnswer && (
+          <div style={{ marginTop: 8, padding: '8px 10px', background: 'var(--surface-2)', borderRadius: 8, fontSize: 13, color: 'var(--ink)' }}>
+            <span style={{ fontWeight: 600, marginRight: 6, color: 'var(--ok)' }}>정답:</span>
+            {question.type === 'blank' 
+              ? question.content.match(/\{\{([^}]+)\}\}/g)?.map(m => m.slice(2, -2)).join(', ') || '없음'
+              : (question.answer || '없음')}
+          </div>
+        )}
       </div>
 
       <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
+        <button
+          onClick={() => setShowAnswer((s) => !s)}
+          className="eh-icon-btn eh-icon-btn-sm"
+          aria-label="정답 보기"
+          title="정답 보기"
+        >
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M8 3c-4 0-7 5-7 5s3 5 7 5 7-5 7-5-3-5-7-5z"/><circle cx="8" cy="8" r="2.5"/></svg>
+        </button>
         <button
           onClick={() => navigate(`/set/${setId}/edit/${question.id}`)}
           className="eh-icon-btn eh-icon-btn-sm"

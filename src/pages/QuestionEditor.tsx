@@ -17,7 +17,7 @@ export function QuestionEditor() {
   const existingQuestion = qid ? set?.questions.find((q) => q.id === qid) : null;
   const isEditing = !!existingQuestion;
 
-  const [type, setType] = useState<'blank' | 'essay'>(existingQuestion?.type ?? 'blank');
+  const [type, setType] = useState<'blank' | 'essay'>(existingQuestion?.type ?? 'essay');
   const [content, setContent] = useState(existingQuestion?.content ?? '');
   const [answer, setAnswer] = useState(existingQuestion?.answer ?? '');
   const [tags, setTags] = useState<string[]>(existingQuestion?.tags ?? []);
@@ -103,7 +103,7 @@ export function QuestionEditor() {
               padding: 3,
               gap: 3,
             }}>
-              {(['blank', 'essay'] as const).map((t) => (
+              {(['essay', 'blank'] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => setType(t)}
