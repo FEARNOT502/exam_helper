@@ -41,20 +41,47 @@ export async function importExamSet(file: File): Promise<ExamSet> {
   });
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const MAX_TEXT = 50_000;
+const MAX_TAGS = 50;
+const MAX_TAG_LEN = 100;
+
+function safeId(v: unknown): string {
+  if (typeof v === 'string' && UUID_RE.test(v)) return v;
+  return crypto.randomUUID();
+}
+
+function safeTags(v: unknown): string[] {
+  if (!Array.isArray(v)) return [];
+  return v
+    .filter((t): t is string => typeof t === 'string' && t.length > 0)
+    .slice(0, MAX_TAGS)
+    .map((t) => t.slice(0, MAX_TAG_LEN));
+}
+
+function safeHistory(v: unknown): Question['history'] {
+  if (!Array.isArray(v)) return [];
+  return v.filter((item): item is Question['history'][number] => {
+    if (!item || typeof item !== 'object') return false;
+    const r = item as Record<string, unknown>;
+    return typeof r.date === 'number' && typeof r.correct === 'boolean' && typeof r.userAnswer === 'string';
+  });
+}
+
 function validateExamSet(raw: unknown): ExamSet {
   if (!raw || typeof raw !== 'object') throw new Error('Invalid format');
   const obj = raw as Record<string, unknown>;
-  if (typeof obj.id !== 'string' || typeof obj.title !== 'string') {
+  if (typeof obj.title !== 'string') {
     throw new Error('Invalid format');
   }
   const questions = Array.isArray(obj.questions)
     ? (obj.questions as unknown[]).map(validateQuestion)
     : [];
   return {
-    id: obj.id as string,
-    title: obj.title as string,
-    subtitle: typeof obj.subtitle === 'string' ? obj.subtitle : undefined,
-    tags: Array.isArray(obj.tags) ? (obj.tags as string[]) : [],
+    id: safeId(obj.id),
+    title: (obj.title as string).slice(0, MAX_TEXT),
+    subtitle: typeof obj.subtitle === 'string' ? obj.subtitle.slice(0, MAX_TEXT) : undefined,
+    tags: safeTags(obj.tags),
     questions,
     createdAt: typeof obj.createdAt === 'number' ? obj.createdAt : Date.now(),
     updatedAt: typeof obj.updatedAt === 'number' ? obj.updatedAt : Date.now(),
@@ -65,12 +92,12 @@ function validateQuestion(raw: unknown): Question {
   if (!raw || typeof raw !== 'object') throw new Error('Invalid question');
   const obj = raw as Record<string, unknown>;
   return {
-    id: typeof obj.id === 'string' ? obj.id : crypto.randomUUID(),
+    id: safeId(obj.id),
     type: obj.type === 'essay' ? 'essay' : 'blank',
-    content: typeof obj.content === 'string' ? obj.content : '',
-    answer: typeof obj.answer === 'string' ? obj.answer : undefined,
-    tags: Array.isArray(obj.tags) ? (obj.tags as string[]) : [],
-    history: Array.isArray(obj.history) ? (obj.history as Question['history']) : [],
+    content: typeof obj.content === 'string' ? obj.content.slice(0, MAX_TEXT) : '',
+    answer: typeof obj.answer === 'string' ? obj.answer.slice(0, MAX_TEXT) : undefined,
+    tags: safeTags(obj.tags),
+    history: safeHistory(obj.history),
     level: ([0, 1, 2, 3].includes(obj.level as number) ? obj.level : 0) as 0 | 1 | 2 | 3,
     nextReviewAt: typeof obj.nextReviewAt === 'number' ? obj.nextReviewAt : 0,
   };

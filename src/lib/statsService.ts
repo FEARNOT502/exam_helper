@@ -60,7 +60,7 @@ export async function logStudySession(opts: {
         row.mode
       );
     } catch (e) {
-      console.warn('[stats] cloud record failed (kept locally)', e);
+      console.warn('[stats] cloud record failed (kept locally)');
     }
   }
 }
@@ -82,7 +82,7 @@ export async function loadAllSessions(userId: string | null): Promise<MergedSess
     try {
       cloud = await fetchStudySessions(userId);
     } catch (e) {
-      console.warn('[stats] cloud fetch failed, using local only', e);
+      console.warn('[stats] cloud fetch failed, using local only');
     }
   }
   const cloudMerged: MergedSession[] = cloud.map((c) => ({

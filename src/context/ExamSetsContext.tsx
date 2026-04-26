@@ -41,7 +41,7 @@ interface ExamSetsContextValue {
 const ExamSetsContext = createContext<ExamSetsContextValue | null>(null);
 
 function safeAsync(fn: () => Promise<void>) {
-  fn().catch((err) => console.error('[examSets sync]', err));
+  fn().catch(() => console.warn('[examSets sync] operation failed'));
 }
 
 export function ExamSetsProvider({ children }: { children: ReactNode }) {
@@ -79,7 +79,7 @@ export function ExamSetsProvider({ children }: { children: ReactNode }) {
               await bulkImportLocalSets(user.id, sets);
               localStorage.setItem('exam-master-pushed-' + user.id, '1');
             } catch (e) {
-              console.warn('[examSets] bulk import skipped', e);
+              console.warn('[examSets] bulk import skipped');
             }
           }
           // 2) hydrate fresh state from cloud
@@ -88,7 +88,7 @@ export function ExamSetsProvider({ children }: { children: ReactNode }) {
             setSetsLocal(cloud);
           }
         } catch (e) {
-          console.error('[examSets] cloud hydrate failed, using local cache', e);
+          console.warn('[examSets] cloud hydrate failed, using local cache');
         } finally {
           if (!cancelled) setLoading(false);
         }

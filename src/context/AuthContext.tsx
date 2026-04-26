@@ -52,9 +52,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = useCallback(async () => {
     if (!supabase) return { error: '백엔드가 설정되지 않았습니다.' };
+    // Construct redirect URL: origin + base path (without trailing hash)
+    // This must match a URL registered in Supabase Auth > URL Configuration > Redirect URLs
+    const redirectUrl = window.location.origin + (window.location.pathname.endsWith('/') 
+      ? window.location.pathname 
+      : window.location.pathname + '/');
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin + window.location.pathname },
+      options: { redirectTo: redirectUrl },
     });
     return error ? { error: error.message } : {};
   }, []);
