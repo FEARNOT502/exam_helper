@@ -80,7 +80,7 @@ export function Dashboard() {
               족보
             </h1>
             <p className="eh-muted" style={{ fontSize: 14, marginTop: 8, maxWidth: 480, lineHeight: 1.55 }}>
-              시험 족보를 단답형·서술형 카드로 쪼개서 반복 학습합니다. 망각곡선 기반 복습으로 오래 기억하세요.
+              시험 족보를 반복 학습합니다.
             </p>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>

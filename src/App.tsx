@@ -14,6 +14,7 @@ import { PracticeMode } from './pages/PracticeMode';
 import { Statistics } from './pages/Statistics';
 import { Login } from './pages/Login';
 import { Privacy } from './pages/Privacy';
+import { Guide } from './pages/Guide';
 
 function AppLayout() {
   return (
@@ -23,6 +24,7 @@ function AppLayout() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/stats" element={<Statistics />} />
+        <Route path="/guide" element={<Guide />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/set/:id" element={<SetDetail />} />
         <Route path="/set/:id/add" element={<QuestionEditor />} />

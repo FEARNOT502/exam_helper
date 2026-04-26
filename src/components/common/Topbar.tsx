@@ -74,6 +74,7 @@ export function Topbar() {
         <nav style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 12 }}>
           <NavTab to="/" label="족보" exact />
           <NavTab to="/stats" label="통계" />
+          <NavTab to="/guide" label="사용법" />
         </nav>
 
         {/* Right */}
