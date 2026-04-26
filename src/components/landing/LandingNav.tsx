@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ThemeToggle } from '../common/ThemeToggle';
+import { ThemeToggle } from '../common/NavBar';
 
 export function LandingNav() {
   return (
