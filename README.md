@@ -1,6 +1,6 @@
-# Exam Master
+# Exam Helper
 
-시험 족보를 단답형/서술형 카드로 분해하여 반복 학습할 수 있는 웹 애플리케이션입니다. 망각곡선(Spaced Repetition) 알고리즘을 기반으로 최적의 복습 시점을 자동 산출하여 장기 기억 정착을 돕습니다.
+시험 족보를 단답형/서술형 카드로 분해하여 반복 학습할 수 있는 웹 애플리케이션입니다. 망각곡선(Spaced Repetition) 알고리즘 기반으로 최적의 복습 시점을 자동 산출하고, Supabase를 통해 모든 기기에서 학습 데이터를 동기화합니다.
 
 **Demo**: https://fearnot502.github.io/exam_helper/
 
@@ -21,6 +21,18 @@
 
 ## 주요 기능
 
+### 계정 및 클라우드 동기화
+- 이메일 또는 Google 계정으로 로그인
+- Supabase 기반 클라우드 저장으로 모든 기기에서 족보 동기화
+- 비로그인 상태에서도 오프라인(LocalStorage) 모드로 동작
+- 로그인 시 기존 로컬 데이터 자동 클라우드 업로드
+
+### 학습 통계
+- 학습 스트릭(연속 학습일) 및 역대 최고 스트릭 표시
+- 12주 학습 캘린더 히트맵
+- 최근 14일 일별 정답률 그래프
+- 누적 정답률, 총 학습 시간, 세션 기록
+
 ### 족보 세트 관리
 - 과목별/시험별로 족보 세트를 생성하고 제목, 부제목, 태그를 부여하여 체계적으로 관리
 - 세트 단위의 검색 및 필터링 지원
@@ -32,10 +44,12 @@
 
 ### 학습 모드
 - 전체/미학습/오답/셔플 등 다양한 필터로 학습 범위 선택
-- 단답형은 자동 채점, 서술형은 모범 답안 대비 유사도 표시와 자기 평가 방식 지원
+- 단답형은 자동 채점 (한국어 형태소 기반 — 어미/조사가 달라도 정답 인정)
+- 서술형은 한국어 어간 매칭 + 글자 bigram 유사도(%)로 자동 채점 추천
 - 학습 중 힌트 기능 (3초간 정답 노출)
 - 키보드 단축키 지원 (좌우 화살표로 문제 이동, Enter로 제출)
 - 학습 완료 후 정답률 및 오답 목록 요약 제공
+- 세션 종료 시 학습 기록 자동 저장
 
 ### 연습 모드
 - 정답을 미리 표시한 상태에서 직접 따라 입력하는 필사 학습
@@ -51,17 +65,15 @@
 - 4단계 암기 레벨 (미학습 / 학습중 / 거의암기 / 암기완료)
 - 레벨별 복습 주기 자동 계산 (즉시 / 1일 / 3일 / 7일)
 - 정답 시 레벨 상승, 오답 시 레벨 초기화
-- 대시보드에서 복습 필요 문제 수 확인
 
 ### 내보내기/가져오기
-- 족보 세트를 JSON 파일로 내보내기 (학습 이력 포함/제외 선택 가능)
+- 족보 세트를 JSON 파일로 내보내기
 - JSON 파일을 불러와 족보 세트 복원
-- 다른 사용자와 족보 공유 가능
 
 ### 기타
-- 다크 모드/라이트 모드 전환
-- 모든 데이터는 브라우저 LocalStorage에 저장 (서버 불필요)
+- 다크 모드/라이트 모드/시스템 설정 전환
 - 반응형 레이아웃
+- 개인정보처리방침 페이지
 
 ---
 
@@ -73,9 +85,10 @@
 | 언어 | TypeScript |
 | 빌드 도구 | Vite 8 |
 | 라우팅 | React Router v7 |
-| 스타일링 | Vanilla CSS + CSS Custom Properties |
+| 스타일링 | Tailwind CSS v4 + CSS Custom Properties |
+| 백엔드/DB | Supabase (PostgreSQL + Auth + RLS) |
 | 드래그 앤 드롭 | @dnd-kit |
-| 배포 | GitHub Pages (gh-pages) |
+| 배포 | GitHub Pages (GitHub Actions) |
 | 폰트 | Pretendard Variable, JetBrains Mono |
 
 ---
@@ -85,31 +98,41 @@
 ```
 src/
   components/
-    common/        # Button, Modal, Badge, Toast 등 공용 UI 컴포넌트
+    common/        # Button, Modal, Badge, Toast, Topbar 등 공용 UI
     dashboard/     # SetCard, StatsOverview 등 대시보드 전용 컴포넌트
     editor/        # BlankSelector, QuestionList, TagInput 등 문제 편집 컴포넌트
     study/         # BlankInput, EssayInput, ResultSummary 등 학습 컴포넌트
   context/
     ThemeContext    # 다크/라이트 모드 상태 관리
     ToastContext    # 알림 토스트 상태 관리
-    ExamSetsContext # 족보 데이터 전역 상태 공유
+    AuthContext     # Supabase 인증 상태 관리
+    ExamSetsContext # 족보 데이터 전역 상태 (클라우드 동기화 포함)
   hooks/
     useExamSets    # 족보 CRUD 및 문제 관리 로직
     useLocalStorage # LocalStorage 동기화 훅
     useStudySession # 학습 세션 상태 및 진행 관리
+  lib/
+    supabase.ts         # Supabase 클라이언트
+    examSetsService.ts  # 족보/문제 클라우드 CRUD
+    statsService.ts     # 학습 세션 기록 및 통계 집계
   pages/
-    Dashboard      # 메인 화면 (족보 목록, 통계 개요)
+    Dashboard      # 메인 화면 (족보 목록)
     SetDetail      # 족보 상세 (문제 목록, 학습/연습/내보내기 진입)
     QuestionEditor # 문제 생성 및 편집
     StudyMode      # 학습 모드 (채점 + 망각곡선 업데이트)
     PracticeMode   # 연습 모드 (필사 학습)
     WrongNotes     # 오답 노트
+    Statistics     # 학습 통계 (스트릭, 캘린더, 그래프)
+    Login          # 로그인/회원가입
+    Privacy        # 개인정보처리방침
   types/
     index.ts       # ExamSet, Question, AttemptRecord 등 타입 정의
   utils/
-    blank-parser   # 빈칸 마크업 파싱, 정답 추출, 유사도 계산
-    spaced-repetition # 암기 레벨 업데이트, 복습 시점 판단
-    export-import  # JSON 내보내기/가져오기, 데이터 유효성 검증
+    blank-parser        # 빈칸 마크업 파싱, 한국어 형태소 기반 유사도 계산
+    spaced-repetition   # 암기 레벨 업데이트, 복습 시점 판단
+    export-import       # JSON 내보내기/가져오기
+supabase/
+  schema.sql       # DB 스키마 + RLS 정책
 ```
 
 ---
@@ -120,6 +143,7 @@ src/
 
 - Node.js 18 이상
 - npm 9 이상
+- Supabase 프로젝트 (선택 — 없으면 오프라인 모드로 동작)
 
 ### 설치 및 실행
 
@@ -131,20 +155,29 @@ cd exam_helper
 # 의존성 설치
 npm install
 
+# 환경변수 설정 (Supabase 사용 시)
+cp .env.example .env
+# .env 파일에 VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY 입력
+
 # 개발 서버 실행
 npm run dev
 ```
 
 개발 서버가 실행되면 `http://localhost:5173/exam_helper/` 에서 확인할 수 있습니다.
 
-### 빌드 및 배포
+### Supabase 설정
 
-```bash
-# 프로덕션 빌드
-npm run build
+1. [supabase.com](https://supabase.com)에서 프로젝트 생성
+2. SQL Editor에서 `supabase/schema.sql` 실행
+3. `.env` 파일에 Project URL과 anon key 입력
 
-# GitHub Pages 배포
-npm run deploy
+### 배포 (GitHub Actions)
+
+GitHub 저장소 Settings → Secrets에 아래 두 값을 등록하면 `main` 브랜치 푸시 시 자동 배포됩니다.
+
+```
+VITE_SUPABASE_URL=https://프로젝트ID.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGci...
 ```
 
 ---
@@ -177,19 +210,15 @@ npm run deploy
 - **오답 문제만**: 틀린 이력이 있는 문제
 - **전체 셔플**: 모든 문제를 랜덤 순서로
 
-### 4. 연습하기
+### 4. 통계 확인하기
 
-"연습하기" 버튼으로 정답을 보면서 따라 입력하는 필사 학습을 진행합니다. 정답과 일치하면 자동으로 다음 문제로 넘어갑니다.
-
-### 5. 복습 관리
-
-학습 결과에 따라 각 문제의 암기 레벨이 자동 조정됩니다. 대시보드와 세트 상세 화면에서 복습이 필요한 문제 수를 확인하고 적시에 복습할 수 있습니다.
+상단 네비게이션의 "통계" 탭에서 학습 스트릭, 캘린더 히트맵, 정답률 그래프를 확인할 수 있습니다.
 
 ---
 
 ## 데이터 관리
 
-모든 데이터는 브라우저의 LocalStorage에 `exam-master-data` 키로 저장됩니다. 별도의 서버나 데이터베이스가 필요 없으며, 브라우저 데이터를 삭제하지 않는 한 유지됩니다.
+로그인한 경우 Supabase에 자동 저장되며 모든 기기에서 동기화됩니다. 비로그인 상태에서는 브라우저 LocalStorage(`exam-master-data`)에 저장됩니다.
 
 데이터 백업이 필요한 경우 세트 상세 화면의 "내보내기" 기능으로 JSON 파일을 다운로드하고, 필요 시 "가져오기"로 복원할 수 있습니다.
 
@@ -209,6 +238,14 @@ npm run deploy
 - 정답을 맞히면 레벨이 1단계 상승합니다.
 - 오답 시 레벨이 0(미학습)으로 초기화됩니다.
 - 서술형의 경우 "부분 정답" 평가 시 레벨이 유지됩니다.
+
+### 형태소 기반 채점
+
+서술형 유사도 채점은 단순 단어 매칭이 아닌 한국어 어간 추출 방식을 사용합니다.
+
+- 어미/조사를 제거한 어간으로 비교 (예: "수행하였다" = "수행한다")
+- 어간 recall(모범답안 커버율) 70% + 글자 bigram 유사도 30% 가중 평균
+- 80% 이상 → 정답 추천 / 40~79% → 부분정답 추천 / 40% 미만 → 오답 추천
 
 ---
 
