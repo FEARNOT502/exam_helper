@@ -151,7 +151,7 @@ export function PracticeMode() {
         </div>
       </div>
 
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '36px 24px 64px' }}>
+      <div className="page-container" style={{ maxWidth: 720, margin: '0 auto', padding: '36px 24px 64px' }}>
         {/* Question meta */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 18, flexWrap: 'wrap' }}>
           <Badge className={currentQuestion.type === 'blank' ? 'eh-chip-blank' : 'eh-chip-essay'}>

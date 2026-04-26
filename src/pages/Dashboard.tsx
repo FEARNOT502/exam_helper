@@ -68,9 +68,9 @@ export function Dashboard() {
 
   return (
     <div className="eh-shell">
-      <div style={{ maxWidth: 1080, margin: '0 auto', padding: '44px 28px 64px' }}>
+      <div className="page-container" style={{ maxWidth: 1080, margin: '0 auto', padding: '44px 28px 64px' }}>
         {/* Header */}
-        <header style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 20, marginBottom: 32, flexWrap: 'wrap' }}>
+        <header className="dashboard-header" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 20, marginBottom: 32, flexWrap: 'wrap' }}>
           <div>
             <p className="eh-eyebrow" style={{ marginBottom: 10 }}>EXAM HELPER · v2</p>
             <h1 style={{
@@ -83,7 +83,7 @@ export function Dashboard() {
               시험 족보를 반복 학습합니다.
             </p>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className="dashboard-actions" style={{ display: 'flex', gap: 8 }}>
             <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 10V2M5 5l3-3 3 3M3 10v3h10v-3"/></svg>
               가져오기
@@ -147,7 +147,7 @@ export function Dashboard() {
         ) : (
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))',
             gap: 12,
           }}>
             {filtered.map((set) => (

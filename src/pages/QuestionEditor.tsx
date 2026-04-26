@@ -67,7 +67,7 @@ export function QuestionEditor() {
 
   return (
     <div className="eh-shell">
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px 64px' }}>
+      <div className="page-container" style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px 64px' }}>
         <button
           onClick={() => navigate(`/set/${setId}`)}
           style={{

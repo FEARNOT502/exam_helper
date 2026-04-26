@@ -84,7 +84,7 @@ export function SetDetail() {
 
   return (
     <div className="eh-shell">
-      <div style={{ maxWidth: 880, margin: '0 auto', padding: '32px 28px 64px' }}>
+      <div className="page-container" style={{ maxWidth: 880, margin: '0 auto', padding: '32px 28px 64px' }}>
         {/* Back link */}
         <button
           onClick={() => navigate('/')}
@@ -102,7 +102,7 @@ export function SetDetail() {
         </button>
 
         {/* Title header */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 20, marginBottom: 28, flexWrap: 'wrap' }}>
+        <div className="set-detail-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 20, marginBottom: 28, flexWrap: 'wrap' }}>
           <div style={{ flex: 1, minWidth: 280 }}>
             {editingTitle ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -150,7 +150,7 @@ export function SetDetail() {
             )}
           </div>
           {!editingTitle && (
-            <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+            <div className="set-detail-actions" style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
               <Button variant="secondary" size="sm" onClick={() => setShowExportModal(true)}>
                 내보내기
               </Button>

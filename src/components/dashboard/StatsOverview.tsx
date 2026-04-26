@@ -33,7 +33,7 @@ export function StatsOverview({ sets }: StatsOverviewProps) {
   const pct = total === 0 ? 0 : Math.round((memorized / total) * 100);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+    <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
       <Stat value={total} label="전체 문제" />
       <Stat value={`${pct}%`} label="암기 완료" tone="ok" />
       <Stat value={dueToday} label="오늘 복습" tone={dueToday > 0 ? 'warn' : 'neutral'} />

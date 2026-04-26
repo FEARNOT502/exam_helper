@@ -278,3 +278,26 @@
   from { opacity: 0; transform: translateY(8px) scale(.98) }
   to   { opacity: 1; transform: none }
 }
+
+/* App pages mobile overrides */
+@media (max-width: 600px) {
+  .eh-shell .topbar-inner { padding: 0 16px !important; gap: 12px !important; }
+  .eh-shell .topbar-nav { gap: 2px !important; }
+  .eh-shell .topbar-brand-text { display: none !important; }
+  
+  .eh-shell .page-container { padding: 24px 16px 48px !important; }
+  .eh-shell .eh-card { padding-left: 16px !important; padding-right: 16px !important; }
+  
+  .eh-shell .dashboard-header { flex-direction: column !important; align-items: stretch !important; gap: 16px !important; }
+  .eh-shell .dashboard-actions { width: 100%; display: grid !important; grid-template-columns: 1fr 1fr; gap: 8px !important; }
+  .eh-shell .dashboard-actions > button, .eh-shell .dashboard-actions > label { width: 100%; justify-content: center; }
+
+  .eh-shell .stats-grid { gap: 8px !important; }
+  .eh-shell .stats-grid > div { padding: 12px 14px !important; }
+  .eh-shell .stats-grid > div > div { font-size: 24px !important; }
+
+  .eh-shell .set-detail-header { flex-direction: column !important; align-items: stretch !important; gap: 16px !important; }
+  .eh-shell .set-detail-actions { display: grid !important; grid-template-columns: 1fr 1fr; width: 100%; gap: 8px !important; }
+  .eh-shell .set-detail-actions > button { width: 100%; justify-content: center; }
+  .eh-shell .set-detail-actions > button:first-child { grid-column: span 2; }
+}

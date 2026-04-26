@@ -82,7 +82,7 @@ export function Statistics() {
 
   return (
     <div className="eh-shell">
-      <div style={{ maxWidth: 1080, margin: '0 auto', padding: '40px 28px 64px' }}>
+      <div className="page-container" style={{ maxWidth: 1080, margin: '0 auto', padding: '40px 28px 64px' }}>
         <header style={{ marginBottom: 28 }}>
           <p className="eh-eyebrow" style={{ marginBottom: 10 }}>STATISTICS</p>
           <h1 style={{ fontSize: 30, fontWeight: 600, letterSpacing: '-.025em', margin: 0 }}>학습 통계</h1>
@@ -94,7 +94,7 @@ export function Statistics() {
         {/* KPI grid */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(140px, 100%), 1fr))',
           gap: 12,
           marginBottom: 24,
         }}>

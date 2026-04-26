@@ -45,7 +45,7 @@ export function Topbar() {
       WebkitBackdropFilter: 'saturate(180%) blur(10px)',
       borderBottom: '1px solid var(--line)',
     }}>
-      <div style={{
+      <div className="topbar-inner" style={{
         maxWidth: 1080, margin: '0 auto',
         display: 'flex', alignItems: 'center', gap: 20,
         height: 60, padding: '0 28px',
@@ -61,7 +61,7 @@ export function Topbar() {
             display: 'grid', placeItems: 'center',
             fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600,
           }}>EH</div>
-          <span style={{ fontSize: 14.5, fontWeight: 600, letterSpacing: '-.01em', color: 'var(--ink)' }}>
+          <span className="topbar-brand-text" style={{ fontSize: 14.5, fontWeight: 600, letterSpacing: '-.01em', color: 'var(--ink)' }}>
             Exam Helper
           </span>
           <span className="eh-mono" style={{
@@ -71,7 +71,7 @@ export function Topbar() {
         </button>
 
         {/* Nav */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 12 }}>
+        <nav className="topbar-nav" style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 12 }}>
           <NavTab to="/dashboard" label="족보" exact />
           <NavTab to="/stats" label="통계" />
           <NavTab to="/guide" label="사용법" />
