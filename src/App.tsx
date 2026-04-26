@@ -1,4 +1,4 @@
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
 import { AuthProvider } from './context/AuthContext';
@@ -6,6 +6,7 @@ import { ExamSetsProvider } from './context/ExamSetsContext';
 import { ToastContainer } from './components/common/Toast';
 import { Topbar } from './components/common/Topbar';
 import { Dashboard } from './pages/Dashboard';
+import { Landing } from './pages/Landing';
 import { SetDetail } from './pages/SetDetail';
 import { QuestionEditor } from './pages/QuestionEditor';
 import { StudyMode } from './pages/StudyMode';
@@ -17,12 +18,17 @@ import { Privacy } from './pages/Privacy';
 import { Guide } from './pages/Guide';
 
 function AppLayout() {
+  const location = useLocation();
+  const isLanding = location.pathname === '/';
+
   return (
     <div className="eh-shell" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Topbar />
+      {!isLanding && <Topbar />}
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<Landing />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Login mode="signup" />} />
         <Route path="/stats" element={<Statistics />} />
         <Route path="/guide" element={<Guide />} />
         <Route path="/privacy" element={<Privacy />} />

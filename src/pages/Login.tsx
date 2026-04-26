@@ -1,18 +1,22 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Button } from '../components/common/Button';
 
 type Mode = 'signin' | 'signup';
 
-export function Login() {
-  const { signInWithEmail, signUpWithEmail, signInWithGoogle, configured } = useAuth();
+export function Login({ mode: initialMode = 'signin' }: { mode?: Mode }) {
+  const { user, signInWithEmail, signUpWithEmail, signInWithGoogle, configured } = useAuth();
   const { showToast } = useToast();
-  const [mode, setMode] = useState<Mode>('signin');
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -52,7 +52,7 @@ export function Topbar() {
       }}>
         {/* Brand */}
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/dashboard')}
           style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
         >
           <div style={{
@@ -72,7 +72,7 @@ export function Topbar() {
 
         {/* Nav */}
         <nav style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 12 }}>
-          <NavTab to="/" label="족보" exact />
+          <NavTab to="/dashboard" label="족보" exact />
           <NavTab to="/stats" label="통계" />
           <NavTab to="/guide" label="사용법" />
         </nav>
